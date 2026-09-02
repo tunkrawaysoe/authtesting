@@ -1,8 +1,8 @@
-import React from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers, removeUser } from "../../../redux/userSlice";
 import "./AdminUsersPage.css";
+import api from "../../../lib/axios";
 const AdminUsersPage = () => {
   const users = useSelector((state) => state.user.items);
   const loading = useSelector((state) => state.user.loading);
@@ -12,14 +12,12 @@ const AdminUsersPage = () => {
   }, [dispatch]);
 
   async function deleteUser(userId) {
-    const response = await fetch(
-      `http://localhost:3000/admin/users/${userId}`,
-      {
-        method: "DELETE",
-      },
-    );
-    if (!response.ok) return;
-    dispatch(removeUser(userId));
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      dispatch(removeUser(userId));
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
   if (loading) {
     return <div>Loading...</div>;

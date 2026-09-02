@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchActor } from "../../../redux/actorSlice";
 import CreateAndEditActor from "../../../components/admin/CreateAndEditActor";
+import api from "../../../lib/axios";
 
 const EditActorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const actor = useSelector((state) => state.actor.item);
   const loading = useSelector((state) => state.actor.loading);
 
@@ -37,20 +37,12 @@ const EditActorPage = () => {
   async function updateActor(e) {
     e.preventDefault();
 
-    const response = await fetch(`http://localhost:3000/actors/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    if (!response.ok) {
-      alert("Failed to update actor.");
-      return;
+    try {
+      await api.patch(`/actors/${id}`, form);
+      navigate("/admin/actors");
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to update actor.");
     }
-
-    navigate("/admin/actors");
   }
 
   if (loading) {

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { MainCard } from "../../../components/MainCard";
 import MovieSection from "../../../components/MovieCardSection";
 import MainCardSection from "../../../components/MainCardSection";
 import Hero from "./Hero";
 import "./Home.css";
+import api from "../../../lib/axios";
 
 export default function Home() {
   const [popularMovies, setPopularMovies] = useState([]);
@@ -11,14 +11,12 @@ export default function Home() {
 
   async function fetchMovies() {
     const [popularResponse, topRatedResponse] = await Promise.all([
-      fetch("http://localhost:3000/movies/popular"),
-      fetch("http://localhost:3000/movies/top-rated"),
+      api.get("/movies/popular"),
+      api.get("/movies/top-rated"),
     ]);
-    const popularMovies = await popularResponse.json();
-    const topMovies = await topRatedResponse.json();
 
-    setPopularMovies(popularMovies);
-    setTopRatedMovies(topMovies);
+    setPopularMovies(popularResponse.data);
+    setTopRatedMovies(topRatedResponse.data);
   }
 
   useEffect(() => {

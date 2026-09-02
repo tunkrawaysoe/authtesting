@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../../lib/axios";
 import "./ReviewPage.css";
 
 const ReviewPage = () => {
@@ -7,21 +8,22 @@ const ReviewPage = () => {
 
   async function deleteReview(reviewId) {
     if (!reviewId) return;
-    const response = await fetch(`http://localhost:3000/reviews/${reviewId}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) return;
-    setReviews((prevReviews) =>
-      prevReviews.filter((review) => review.id !== reviewId),
-    );
+
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      setReviews((prevReviews) =>
+        prevReviews.filter((review) => review.id !== reviewId),
+      );
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
 
   useEffect(() => {
     async function getReviews() {
       try {
-        const response = await fetch("http://localhost:3000/reviews");
-        const data = await response.json();
-        setReviews(data);
+        const response = await api.get("/reviews");
+        setReviews(response.data);
       } catch (error) {
         console.error(error);
       } finally {

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DirectorForm from "../../../components/admin/DirectorForm";
+import api from "../../../lib/axios";
 
 const DirectorEditPage = () => {
   const { id } = useParams();
@@ -13,17 +14,18 @@ const DirectorEditPage = () => {
 
   useEffect(() => {
     async function fetchDirector() {
-      const response = await fetch(`http://localhost:3000/directors/${id}`);
+      try {
+        const response = await api.get(`/directors/${id}`);
+        const director = response.data;
 
-      if (!response.ok) return;
-
-      const director = await response.json();
-
-      setForm({
-        name: director.name || "",
-        biography: director.biography || "",
-        birthDate: director.birthDate ? director.birthDate.slice(0, 10) : "",
-      });
+        setForm({
+          name: director.name || "",
+          biography: director.biography || "",
+          birthDate: director.birthDate ? director.birthDate.slice(0, 10) : "",
+        });
+      } catch (error) {
+        console.error(error.response?.data?.message || error.message);
+      }
     }
 
     fetchDirector();
@@ -31,20 +33,18 @@ const DirectorEditPage = () => {
 
   async function editDirector(e) {
     e.preventDefault();
+
     const data = {
       ...form,
       birthDate: form.birthDate ? form.birthDate : null,
     };
-    console.log("data", data);
-    const response = await fetch(`http://localhost:3000/directors/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) return;
-    navigate("/admin/directors");
+
+    try {
+      await api.patch(`/directors/${id}`, data);
+      navigate("/admin/directors");
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
 
   return (

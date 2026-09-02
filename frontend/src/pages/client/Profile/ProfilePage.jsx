@@ -4,6 +4,7 @@ import { clearProfile, fetchUser } from "../../../redux/userSlice";
 import "./ProfilePage.css";
 import { logOut } from "../../../redux/authSlice";
 import { useNavigate } from "react-router-dom";
+import api from "../../../lib/axios";
 
 const ProfilePage = () => {
   const accessToken = useSelector((state) => state.auth.accessToken);
@@ -14,14 +15,15 @@ const ProfilePage = () => {
 
   async function handleLogout() {
     try {
-      await fetch("http://localhost:3000/auth/logout", {
-        credentials: "include",
-      });
+      await api.post("/auth/logout");
       dispatch(logOut());
       dispatch(clearProfile());
       navigate("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error(
+        "Logout failed:",
+        error.response?.data?.message || error.message,
+      );
     }
   }
   useEffect(() => {

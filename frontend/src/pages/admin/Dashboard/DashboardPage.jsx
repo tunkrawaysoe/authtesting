@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../../../lib/axios";
 import "./Dashboard.css";
 
 export default function DashboardPage() {
@@ -6,12 +7,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchDashboard() {
-      const response = await fetch("http://localhost:3000/admin/dashboard");
-      const data = await response.json();
-
-      if (!response.ok) return;
-
-      setDashboard(data);
+      try {
+        const response = await api.get("/admin/dashboard");
+        setDashboard(response.data);
+      } catch (error) {
+        console.error(error.response?.data?.message || error.message);
+      }
     }
 
     fetchDashboard();

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MainCard } from "../../../components/MainCard";
 import PaginationButton from "../../../components/PaginationButton";
+import api from "../../../lib/axios";
 import "./Movies.css";
 
 const Movies = () => {
@@ -14,12 +15,15 @@ const Movies = () => {
   }
 
   async function fetchAllData() {
-    const response = await fetch(`http://localhost:3000/movies?page=${page}`);
-    const data = await response.json();
-    setAllMovies(data.movies);
-    setTotalPages(data.totalPages);
-  }
+    try {
+      const response = await api.get(`/movies?page=${page}`);
 
+      setAllMovies(response.data.movies);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
+  }
   useEffect(() => {
     fetchAllData();
   }, [page]);

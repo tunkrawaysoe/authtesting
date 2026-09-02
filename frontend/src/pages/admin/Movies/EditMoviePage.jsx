@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchMovie } from "../../../redux/movieSlice";
 import CreateAndEditForm from "../../../components/admin/CreateAndEditForm";
+import api from "../../../lib/axios";
 
 const EditMoviePage = () => {
   const navigate = useNavigate();
@@ -59,15 +60,14 @@ const EditMoviePage = () => {
 
   const updateMovie = async (e) => {
     e.preventDefault();
-    const response = await fetch(`http://localhost:3000/admin/movies/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-    if (!response.ok) return;
-    navigate("/admin/movies");
+
+    try {
+      await api.patch(`/admin/movies/${id}`, form);
+
+      navigate("/admin/movies");
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   };
 
   return (

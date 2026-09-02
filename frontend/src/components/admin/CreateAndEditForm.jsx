@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../lib/axios";
 import "./CreateAndEditForm.css";
+
 const CreateAndEditForm = ({ submitForm, form, setForm, title }) => {
   const [genres, setGenres] = useState([]);
   const [actors, setActors] = useState([]);
@@ -90,15 +92,19 @@ const CreateAndEditForm = ({ submitForm, form, setForm, title }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const [genreRes, actorRes, directorRes] = await Promise.all([
-        fetch("http://localhost:3000/genres"),
-        fetch("http://localhost:3000/actors"),
-        fetch("http://localhost:3000/directors"),
-      ]);
+      try {
+        const [genreRes, actorRes, directorRes] = await Promise.all([
+          api.get("/genres"),
+          api.get("/actors"),
+          api.get("/directors"),
+        ]);
 
-      setGenres(await genreRes.json());
-      setActors(await actorRes.json());
-      setDirectors(await directorRes.json());
+        setGenres(genreRes.data);
+        setActors(actorRes.data);
+        setDirectors(directorRes.data);
+      } catch (error) {
+        console.error(error.response?.data?.message || error.message);
+      }
     }
     fetchData();
   }, []);

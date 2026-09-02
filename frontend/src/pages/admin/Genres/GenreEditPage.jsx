@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import GenreForm from "../../../components/admin/GenreForm";
+import api from "../../../lib/axios";
 
 const GenreEditPage = () => {
   const [form, setForm] = useState({
@@ -14,17 +15,14 @@ const GenreEditPage = () => {
 
   async function editGenre(e) {
     e.preventDefault();
-    const response = await fetch(`http://localhost:3000/genres/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-    if (!response.ok) return;
-    navigate("/admin/genres");
-  }
 
+    try {
+      await api.patch(`/genres/${id}`, form);
+      navigate("/admin/genres");
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
+  }
   useEffect(() => {
     if (!genreToEdit) return;
     setForm({

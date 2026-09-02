@@ -1,57 +1,29 @@
 import { useDispatch, useSelector } from "react-redux";
 import { fetchWatchList } from "../../../redux/watchListSlice";
+import api from "../../../lib/axios";
 
 const MovieDetailsCard = ({ movieId }) => {
   const movieDetails = useSelector((state) => state.movie.item);
   const accessToken = useSelector((state) => state.auth.accessToken);
   const watchlist = useSelector((state) => state.watchList.movies);
   const dispatch = useDispatch();
-  
+
   const addedToWatchList = watchlist?.some(
     (list) => list.id === Number(movieId),
   );
 
   async function handleWatchList() {
-    if (!addedToWatchList) {
-      const response = await fetch(
-        `http://localhost:3000/watchlist/${movieDetails.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
+    try {
+      if (!addedToWatchList) {
+        await api.post(`/watchlist/${movieDetails.id}`);
         dispatch(fetchWatchList(accessToken));
-      } else {
-        console.log(data.message);
+        return;
       }
 
-      return;
-    }
-
-    const response = await fetch(
-      `http://localhost:3000/watchlist/${movieDetails.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
+      await api.delete(`/watchlist/${movieDetails.id}`);
       dispatch(fetchWatchList(accessToken));
-    } else {
-      console.log(data.message);
+    } catch (error) {
+      console.log(error.response?.data?.message || error.message);
     }
   }
   return (

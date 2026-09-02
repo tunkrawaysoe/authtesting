@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateAndEditForm from "../../../components/admin/CreateAndEditForm";
+import api from "../../../lib/axios";
+
 const CreateMoviePage = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -18,17 +20,15 @@ const CreateMoviePage = () => {
 
   async function createMovie(e) {
     e.preventDefault();
-    const response = await fetch("http://localhost:3000/admin/movies", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-    if (!response.ok) return;
-    navigate("/admin/movies");
-  }
 
+    try {
+      await api.post("/admin/movies", form);
+
+      navigate("/admin/movies");
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
+  }
   return (
     <CreateAndEditForm
       submitForm={createMovie}

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import "./Auth.css";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/authSlice";
+import api from "../lib/axios";
+import "./Auth.css";
 
 const AuthForm = ({ type }) => {
   const isRegister = type === "register";
@@ -28,40 +29,39 @@ const AuthForm = ({ type }) => {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    const response = await fetch(
-      isRegister
-        ? "http://localhost:3000/auth/register"
-        : "http://localhost:3000/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(form),
-      },
-    );
 
-    const data = await response.json();
-    if (response.ok) {
+    try {
+      const endpoint = isRegister ? "/auth/register" : "/auth/login";
+
+      const response = await api.post(endpoint, form);
+
+      const data = response.data;
+
       dispatch(
         loginSuccess({
           accessToken: data.accesstoken,
           user: data.user,
         }),
       );
+
       isRegister ? navigate("/login") : navigate("/");
-      return;
-    }
+    } catch (error) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
 
-    if (response.status === 404) {
-      setError(data.message);
-      setTimeout(() => navigate("/register"), 2000);
-      return;
+      if (status === 404) {
+        setError(message);
+
+        setTimeout(() => {
+          navigate("/register");
+        }, 2000);
+
+        return;
+      }
+
+      setError(message || "Something went wrong");
     }
-    setError(data.message);
   }
-
   return (
     <div className="auth-container">
       <form className="auth-card" onSubmit={handleSubmit}>

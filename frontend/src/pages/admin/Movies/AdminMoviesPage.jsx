@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchMovies } from "../../../redux/movieSlice";
 import { useNavigate } from "react-router-dom";
 import "./AdminMoviesPage.css";
+import api from "../../../lib/axios";
 
 export default function AdminMoviesPage() {
   const movies = useSelector((state) => state.movie.items);
@@ -12,17 +13,14 @@ export default function AdminMoviesPage() {
 
   async function deleteMovie(movieId) {
     if (!movieId) return;
-    const response = await fetch(
-      `http://localhost:3000/admin/movies/${movieId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-type": "application/json",
-        },
-      },
-    );
-    if (!response.ok) return;
-    dispatch(fetchMovies());
+
+    try {
+      await api.delete(`/admin/movies/${movieId}`);
+
+      dispatch(fetchMovies());
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
 
   useEffect(() => {

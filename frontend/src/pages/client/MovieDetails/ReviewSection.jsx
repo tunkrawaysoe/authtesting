@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { setSocketToken, socket } from "../../../lib/socket.js";
 import { useEffect } from "react";
+import api from "../../../lib/axios.js";
 
 const ReviewSection = ({ reviews, movieId, getReviews, userReviewed }) => {
   const [rating, setRating] = useState(0);
@@ -10,30 +11,21 @@ const ReviewSection = ({ reviews, movieId, getReviews, userReviewed }) => {
 
   async function addReview(e) {
     e.preventDefault();
-    const response = await fetch(
-      `http://localhost:3000/movies/${movieId}/reviews`,
-      {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          rating,
-          comment,
-        }),
-      },
-    );
-    const data = await response.json();
-    if (response.ok) {
+
+    try {
+      await api.post(`/movies/${movieId}/reviews`, {
+        rating,
+        comment,
+      });
+
       await getReviews();
+
       setRating(0);
       setComment("");
-    } else {
-      console.log(data.message);
+    } catch (error) {
+      console.log(error.response?.data?.message || error.message);
     }
   }
-
   useEffect(() => {
     setSocketToken(accessToken);
     socket.connect();

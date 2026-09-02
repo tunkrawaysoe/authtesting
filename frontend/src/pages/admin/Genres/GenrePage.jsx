@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchGenres, removeGenre } from "../../../redux/GenreSlice";
+import api from "../../../lib/axios";
 import "./GenrePage.css";
 
 const GenrePage = () => {
@@ -13,11 +14,13 @@ const GenrePage = () => {
 
   async function deleteGenre(genreId) {
     if (!genreId) return;
-    const response = await fetch(`http://localhost:3000/genres/${genreId}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) return;
-    dispatch(removeGenre(genreId));
+
+    try {
+      await api.delete(`/genres/${genreId}`);
+      dispatch(removeGenre(genreId));
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
 
   useEffect(() => {

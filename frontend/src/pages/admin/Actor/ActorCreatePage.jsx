@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import CreateAndEditActor from "../../../components/admin/CreateAndEditActor";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CreateAndEditActor from "../../../components/admin/CreateAndEditActor";
+import api from "../../../lib/axios";
 
 const ActorCreatePage = () => {
   const navigate = useNavigate();
@@ -13,17 +14,12 @@ const ActorCreatePage = () => {
 
   async function createActor(e) {
     e.preventDefault();
-    const response = await fetch("http://localhost:3000/actors", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-    if (response.ok) {
+
+    try {
+      await api.post("/actors", form);
       navigate("/admin/actors");
-    } else {
-      console.error("Failed to create actor");
+    } catch (error) {
+      console.error(error.response?.data?.message || "Failed to create actor");
     }
   }
 

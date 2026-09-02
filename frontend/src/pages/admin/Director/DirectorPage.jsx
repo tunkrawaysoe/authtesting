@@ -1,28 +1,22 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { fetchDirectors, removeDirector } from "../../../redux/directorSlice";
 import PersonTable from "../../../components/admin/PersonTable";
-import { useNavigate } from "react-router-dom";
+import api from "../../../lib/axios";
+
 const DirectorPage = () => {
   const directors = useSelector((state) => state.director.items);
   const loading = useSelector((state) => state.director.loading);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   async function deleteDirector(directorId) {
-    const response = await fetch(
-      `http://localhost:3000/directors/${directorId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-type": "application/json",
-        },
-      },
-    );
-    if (!response.ok) {
-      alert("Failed to delete");
+    try {
+      await api.delete(`/directors/${directorId}`);
+      dispatch(removeDirector(directorId));
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to delete");
     }
-    dispatch(removeDirector(directorId));
   }
 
   useEffect(() => {

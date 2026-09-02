@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "../../../redux/userSlice";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import api from "../../../lib/axios";
 
 const ProfileEditPage = () => {
   const user = useSelector((state) => state.user.profile);
-  const accessToken = useSelector((state) => state.auth.accessToken);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -22,17 +20,13 @@ const ProfileEditPage = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const response = await fetch("http://localhost:3000/users/me", {
-      method: "PATCH",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify(form),
-    });
 
-    if (!response.ok) return;
-    navigate("/profile");
+    try {
+      await api.patch("/users/me", form);
+      navigate("/profile");
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+    }
   }
 
   useEffect(() => {
